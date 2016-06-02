@@ -1,0 +1,23 @@
+{
+  "name": "Main-Coocking-App-Admin",
+  "version": "1.0.0",
+  "description": "Coocking-app Admin",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://bitbucket.org/fatalityap/ios-cookingapp.git"
+  },
+  "keywords": [
+    "coock-boock-ios"
+  ],
+  "author": "Alexey Ponomanreko",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/fatalityap/ios-cookingapp#readme",
+  "dependencies": {
+    "express" : "^4.13.4"
+  }
+}

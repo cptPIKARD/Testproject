@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="MulticookApp">
+<head>
+    <title>Multicooker</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link href="css/styles.css" rel="stylesheet">
+    <link href="css/ngDialog.css" rel="stylesheet">
+    <link href="css/ngDialog-theme-default.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/ngTimepicker.css">
+    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
+
+    <script src="js/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="js/ui-bootstrap-tpls-1.3.2.min.js"></script>
+    <script src="js/moment-with-locales.js"></script>
+    <script src="js/angular-ui-router.min.js"></script>
+
+    <script src="js/MulticookApp.js"></script>
+    <script src="js/MulticookCtrl.js"></script>
+    <script src="js/factories/AuthInterceptor.js"></script>
+    <script src="js/factories/AuthTokenFactory.js"></script>
+    <script src="js/factories/UserFactory.js"></script>
+    <script src="js/factories/modalWindowLoaderFactory.js"></script>
+    <script src="js/picture_preview.js"></script>
+    <script src="js/ngTimepicker.min.js"></script>
+    <script src="js/ngDialog.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <script src="js/restangular.js"></script>
+
+</head>
+<body ng-controller="MulticookCtrl">
+<figure class="img-logotype-img-center">
+    <img  src="images/logo_150.jpg" alt="">
+    <h1>MultiCook Admin Panel</h1>
+</figure>
+<div ng-hide="user" class="container">
+    <div class="row">
+        <form ng-submit="login(username, password)" class="col-md-4 col-md-offset-5">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" ng-model="username" placeholder="username"/>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" ng-model="password" placeholder="password"/>
+            </div>
+            <button type="submit" class="btn btn-default">Login</button>
+        </form>
+    </div>
+    <div class="row">
+        <div class="form-group col-md-4 col-md-offset-5">
+            <div class="form-group has-error" ng-show="loginErrorMessage">
+                <label class="control-label">{{loginErrorMessage}}</label>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container" ng-show="user">
+    <h2>Welcome {{user}}</h2>
+    <button ng-click="logout()" class="btn btn-default">Logout</button>
+    <h2>Категории <button type="button" class="btn btn-info">Создать</button></h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th class="table-header-color">Название (кликните на категории)</th>
+                <th class="table-header-color">Кнопки редактирования</th>
+                <th class="table-header-color">Загрузка картинок</th>
+            </tr>
+            </thead>
+            <tbody highlight-selected-row id="category">
+            <tr ng-repeat="category in categories" data-categoryId="{{category.id}}">
+                <td ui-sref="categories({id: category.id})" ng-click="showRecipe(this.category.id)" style="cursor: pointer">{{category.name}}</td>
+                <td>
+                    <button type="button" class="btn btn-info">Редактировать</button>
+                    <button type="button" class="btn btn-info">Удалить</button>
+                </td>
+                <td>
+                    <input type="file" ng-model="newImage" file-changed accept="image/*,image/jpeg"/>
+                    <img file-preview="newImage" width="100" height="100"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <h2>Рецепты <button type="button" class="btn btn-info">Создать</button></h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th class="table-header-color">Название (кликните на рецепте)</th>
+                <th class="table-header-color">Описание</th>
+                <th class="table-header-color">Время приготовления</th>
+                <th class="table-header-color">Калорийность</th>
+                <th class="table-header-color">Кнопки редактирования</th>
+                <th class="table-header-color">Загрузка картинок</th>
+            </tr>
+            </thead>
+            <tbody highlight-selected-row id="recipe">
+            <tr ng-repeat="recipe in recipes" data-recipeId="{{recipe.id}}">
+                <td ui-sref='categories.recipes({recipeId:recipe.id})' ng-click="showIngredientAndSteps(this.recipe.id)" style="cursor: pointer">{{recipe.name}}</td>
+                <td>{{recipe.description}}</td>
+                <td>
+                    <div>
+                        <ng-timepicker ng-model="ctrl.time3" init-time="{{recipe.timeToCookForTimepicker}}" theme="red"></ng-timepicker>
+                    </div>
+                </td>
+                <td>{{recipe.energyValue}}</td>
+                <td>
+                    <button type="button" class="btn btn-info">Редактировать</button>
+                    <button type="button" class="btn btn-info">Удалить</button></td>
+                <td>
+                    <input type="file" ng-model="newImage3" file-changed accept="image/*,image/jpeg"/>
+                    <img file-preview="newImage3" width="100" height="100"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <h2>Ингридиенты <button type="button" class="btn btn-info">Создать</button></h2>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th width=100; class="table-header-color">Выбрано для рецепта</th>
+                <th class="table-header-color">Название</th>
+                <th class="table-header-color">Количество ингридиента</th>
+                <th class="table-header-color">Еденица измерения</th>
+                <th class="table-header-color">Кнопки редактирования</th>
+            </tr>
+            </thead>
+            <tbody highlight-selected-row id="ingredient">
+            <tr ng-repeat="ingredient in ingredients">
+                <td style="text-align:center"><input type="checkbox" name="option1" value="a1" ng-model="checkIngredient"><Br></td>
+                <td>{{ingredient.name}}</td>
+                <td><p><input type="number" size="3" name="num" min="0" max="1000" value="{{ingredient.amountOfProduct}}"></p></td>
+                <td>
+                    <select name="select" ng-options="unitsofmeasure.id as unitsofmeasure.name for unitsofmeasure in unitsofmeasures" ng-model="ingredient.unitOfMeasureId"></select>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-info">Редактировать</button>
+                    <button type="button" class="btn btn-info">Удалить</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <h2>Шаги к приготовлению <button type="button" class="btn btn-info">Создать</button></h2>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th class="table-header-color">Название</th>
+                <th class="table-header-color">Описание</th>
+                <th class="table-header-color">Время шага</th>
+                <th class="table-header-color">Кнопки редактирования</th>
+                <th class="table-header-color">Загрузка картинок</th>
+            </tr>
+            </thead>
+            <tbody highlight-selected-row id="stepstocook">
+            <tr ng-repeat="stepstocook in stepstocooks">
+                <td>{{stepstocook.name}}</td>
+                <td>{{stepstocook.description}}</td>
+                <td>
+                    <div id="datetimepicker33" class="input-append">
+                        <ng-timepicker ng-model="ctrl.time3" init-time="{{ stepstocook.timeForStepForTimepicker }}" theme="red"></ng-timepicker>
+                    </div>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-info">Редактировать</button>
+                    <button type="button" class="btn btn-info">Удалить</button>
+                </td>
+                <td>
+                    <input type="file" ng-model="newImage6" file-changed accept="image/*,image/jpeg"/>
+                    <img file-preview="newImage6" width="100" height="100"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
