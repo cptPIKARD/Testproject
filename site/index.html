@@ -1,54 +1,61 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="MulticookApp">
 <head>
-    <title>Multicooker</title>
+    <title>Multicook admin panel</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/libs/animate.css">
     <link href="css/styles.css" rel="stylesheet">
-    <link href="css/ngDialog.css" rel="stylesheet">
-    <link href="css/ngDialog-theme-default.css" rel="stylesheet">
-    <link href="css/font-awesome.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/ngTimepicker.css">
-    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link href="css/libs/ngDialog.css" rel="stylesheet">
+    <link href="css/libs/ngDialog-theme-default.css" rel="stylesheet">
+    <link href="css/libs/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/libs/ngTimepicker.css">
+    <link href="js/libs/confirm-click/alertify/alertify.core.css" rel="stylesheet">
+    <link href="js/libs/confirm-click/alertify/alertify.default.css" rel="stylesheet">
+    <link href="js/libs/confirm-click/ng-alertify/dist/ng-alertify.css" rel="stylesheet">
 
-    <script src="js/angular.min.js"></script>
+    <script src="js/libs/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-    <script src="js/ui-bootstrap-tpls-1.3.2.min.js"></script>
-    <script src="js/moment-with-locales.js"></script>
-    <script src="js/angular-ui-router.min.js"></script>
+    <script src="js/libs/ui-bootstrap-tpls-1.3.3.min.js"></script>
+    <script src="js/libs/angular-animate.min.js"></script>
+    <script src="js/libs/moment-with-locales.js"></script>
+    <script src="js/libs/angular-ui-router.min.js"></script>
 
-    <script src="js/MulticookApp.js"></script>
-    <script src="js/MulticookCtrl.js"></script>
+    <script src="js/Utils/config.js"></script>
+    <script src="js/Apps/MulticookApp.js"></script>
+    <script src="js/Controllers/MulticookCtrl.js"></script>
     <script src="js/factories/AuthInterceptor.js"></script>
     <script src="js/factories/AuthTokenFactory.js"></script>
     <script src="js/factories/UserFactory.js"></script>
     <script src="js/factories/modalWindowLoaderFactory.js"></script>
-    <script src="js/picture_preview.js"></script>
-    <script src="js/ngTimepicker.min.js"></script>
-    <script src="js/ngDialog.js"></script>
+    <script src="js/libs/picture_preview.js"></script>
+    <script src="js/libs/ngDialog.js"></script>
     <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
-    <script src="js/restangular.js"></script>
+    <script src="js/libs/restangular.js"></script>
+    <script src="js/libs/confirm-click/confirm-click.js"></script>
+    <script src="js/libs/confirm-click/alertify/alertify.js"></script>
+    <script src="js/libs/confirm-click/ng-alertify/dist/ng-alertify.js" rel="stylesheet"></script>
 
 </head>
 <body ng-controller="MulticookCtrl">
 <figure class="img-logotype-img-center">
-    <img  src="images/logo_150.jpg" alt="">
+    <img  src="images/logo_150.png" alt="">
     <h1>MultiCook Admin Panel</h1>
 </figure>
 <div ng-hide="user" class="container">
     <div class="row">
         <form ng-submit="login(username, password)" class="col-md-4 col-md-offset-5">
             <div class="form-group">
-                <label for="username">Username</label>
+                <label for="username">Имя пользователя</label>
                 <input type="text" class="form-control" id="username" ng-model="username" placeholder="username"/>
             </div>
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password">Пароль</label>
                 <input type="password" class="form-control" id="password" ng-model="password" placeholder="password"/>
             </div>
-            <button type="submit" class="btn btn-default">Login</button>
+            <button type="submit" class="btn btn-default">Вход</button>
         </form>
     </div>
     <div class="row">
@@ -60,9 +67,39 @@
     </div>
 </div>
 <div class="container" ng-show="user">
-    <h2>Welcome {{user}}</h2>
-    <button ng-click="logout()" class="btn btn-default">Logout</button>
-    <h2>Категории <button type="button" class="btn btn-info">Создать</button></h2>
+    <h2>Привет {{user}}</h2>
+    <button ng-click="logout()" type="button" class="btn btn-default">Выход</button>
+    <h2>Категории <button type="button" class="btn btn-info" ng-click="showCategoryAddition()">Создание новой категории</button></h2>
+    <div class="alert alert-success" ng-show="isSuccessCategoryModification">
+        <strong>Success!</strong> {{successCategoryMessage}}
+    </div>
+    <div class="alert alert-danger" ng-show="isErrorCategoryModification">
+        <strong>Error!</strong> {{errorCategoryMessage}}
+    </div>
+    <form role="form" ng-show="isErrorCategoryAdditionShown" name="categoryAdd">
+        <div class="form-group" ng-class="{ 'has-error' : categoryAdd.$invalid }">
+            <label for="categoryName">Имя новой категории:</label>
+            <input type="text" class="form-control" id="categoryName" name="newCategoryName" ng-required="true" ng-model="newCategoryName" >
+        </div>
+        <div ng-messages="categoryAdd.$error" ng-if="categoryAdd.newCategoryName.$invalid" class="animated bounceIn cls-control-invalid">
+            <div ng-message="required">Вы должны ввести имя категории</div>
+        </div>
+        <br />
+        <button type="button" class="btn btn-default" ng-click="addCategory()">Создать</button>
+        <br />
+    </form>
+    <form role="form" ng-show="isCategoryModificationShown" name="categoryModification">
+        <div class="form-group" ng-class="{ 'has-error' : categoryModification.$invalid }">
+            <label for="categoryNameForEdit">Имя редактируемой категории:</label>
+            <input type="text" class="form-control" name="editCategoryName" id="categoryNameForEdit" ng-required="true" ng-model="editCategoryName" >
+        </div>
+        <div ng-messages="categoryModification.$error" ng-if="categoryModification.editCategoryName.$invalid" class="animated bounceIn cls-control-invalid">
+            <div ng-message="required">Вы должны ввести имя категории</div>
+        </div>
+        <br />
+        <button type="button" class="btn btn-default" ng-click="saveEditedCategory()">Сохранить</button>
+        <br />
+    </form>
     <div class="table-responsive">
         <table class="table table-bordered table-hover">
             <thead>
@@ -76,8 +113,8 @@
             <tr ng-repeat="category in categories" data-categoryId="{{category.id}}">
                 <td ui-sref="categories({id: category.id})" ng-click="showRecipe(this.category.id)" style="cursor: pointer">{{category.name}}</td>
                 <td>
-                    <button type="button" class="btn btn-info">Редактировать</button>
-                    <button type="button" class="btn btn-info">Удалить</button>
+                    <button type="button" class="btn btn-info" ng-click="editCategory(category.id,category.name)">Редактировать</button>
+                    <button type="button" class="btn btn-info" ng-click="deleteCategory(category.id)" confirm-click="Вы действительно хотите удалить категорию?">Удалить</button>
                 </td>
                 <td>
                     <input type="file" ng-model="newImage" file-changed accept="image/*,image/jpeg"/>
@@ -87,7 +124,66 @@
             </tbody>
         </table>
     </div>
-    <h2>Рецепты <button type="button" class="btn btn-info">Создать</button></h2>
+    <h2>Рецепты <button type="button" class="btn btn-info" ng-click="showRecipeAddition()">Создание нового рецепта</button></h2>
+    <div class="alert alert-success" ng-show="isSuccessRecipeModification">
+        <strong>Success!</strong> {{successRecipeMessage}}
+    </div>
+    <div class="alert alert-danger" ng-show="isErrorRecipeModification">
+        <strong>Error!</strong> {{errorRecipeMessage}}
+    </div>
+    <div>
+    <form role="form" ng-show="isErrorRecipeAdditionShown" name="recipeAdd">
+        <div class="form-group" ng-class="{ 'has-error' : recipeAdd.$invalid }">
+            <label for="recipeName">Имя нового рецепта:</label>
+            <input type="text" class="form-control" id="recipeName" name="newRecipeName" ng-required="true" ng-model="newRecipeName">
+            <div ng-messages="recipeAdd.$error" ng-if="recipeAdd.newRecipeName.$invalid" class="animated bounceIn cls-control-invalid">
+                <div ng-message="required">Вы должны ввести имя рецепта</div>
+            </div>
+            <label for="recipeName">Каллорийность нового рецепта:</label>
+            <input type="number" class="form-control" id="recipeEnergyValue" name="newRecipeEnergyValue" ng-required="true" ng-model="newRecipeEnergyValue">
+            <div ng-messages="recipeAdd.$error" ng-if="recipeAdd.newRecipeEnergyValue.$invalid" class="animated bounceIn cls-control-invalid">
+                <div ng-message="required">Вы должны ввести каллорийность рецепта</div>
+            </div>
+            <label for="recipeName">Время приготовления нового рецепта:</label><br>
+            <uib-timepicker ng-model="newRecipeTimeToCook" ng-change="changed()" hour-step="hstep" minute-step="mstep"></uib-timepicker>
+            <label for="recipeName">Описание нового рецепта:</label>
+            <input type="text" class="form-control" id="recipeDescription" name="newRecipeDescription" ng-required="true" ng-model="newRecipeDescription">
+            <div ng-messages="recipeAdd.$error" ng-if="recipeAdd.newRecipeDescription.$invalid" class="animated bounceIn cls-control-invalid">
+                <div ng-message="required">Вы должны ввести описание нового рецепта</div>
+            </div>
+        </div>
+        <div ng-messages="recipeAdd.$error" ng-if="recipeAdd.$invalid" class="animated bounceIn cls-control-invalid">
+            <div ng-message="required">Вы должны заполнить форму полностью</div>
+        </div>
+        <br />
+        <button type="button" class="btn btn-default" ng-click="addRecipe()">Создать</button>
+        <br/>
+    </form>
+    <form role="form" ng-show="isRecipeModificationShown" name="recipeModification">
+        <div class="form-group" ng-class="{ 'has-error' : recipeModification.$invalid }">
+            <label for="recipeNameForEdit">Имя редактируемого рецепта:</label>
+            <input type="text" class="form-control" name="editRecipeName" id="recipeNameForEdit" ng-required="true" ng-model="editRecipeName" >
+        </div>
+        <div ng-messages="recipeModification.$error" ng-if="recipeModification.editRecipeName.$invalid" class="animated bounceIn cls-control-invalid">
+            <div ng-message="required">Вы должны ввести имя редактируемого рецепта</div>
+        </div>
+        <label for="recipeEnergyValueForEdit">Каллорийность редактируемого рецепта:</label>
+        <input type="number" class="form-control" id="recipeEnergyValueForEdit" name="editRecipeEnergyValue" ng-required="true" ng-model="editRecipeEnergyValue">
+        <div ng-messages="recipeModification.$error" ng-if="recipeModification.editRecipeEnergyValue.$invalid" class="animated bounceIn cls-control-invalid">
+            <div ng-message="required">Вы должны ввести каллорийность редактируемого рецепта</div>
+        </div>
+        <label for="recipeName">Время приготовления редактируемого рецепта:</label><br>
+        <uib-timepicker ng-model="editRecipeTimeToCook" ng-change="changed()" hour-step="hstep" minute-step="mstep"></uib-timepicker>
+        <label for="recipeDescriptionForEdit">Описание редактируемого рецепта:</label>
+        <input type="text" class="form-control" id="recipeDescriptionForEdit" name="editRecipeDescription" ng-required="true" ng-model="editRecipeDescription">
+        <div ng-messages="recipeModification.$error" ng-if="recipeModification.editRecipeDescription.$invalid" class="animated bounceIn cls-control-invalid">
+            <div ng-message="required">Вы должны ввести описание редактируемого рецепта</div>
+        </div>
+        <br />
+        <button type="button" class="btn btn-default" ng-click="saveEditedRecipe()">Сохранить</button>
+        <br />
+    </form>
+    </div>
     <div class="table-responsive">
         <table class="table table-bordered table-hover">
             <thead>
@@ -104,15 +200,11 @@
             <tr ng-repeat="recipe in recipes" data-recipeId="{{recipe.id}}">
                 <td ui-sref='categories.recipes({recipeId:recipe.id})' ng-click="showIngredientAndSteps(this.recipe.id)" style="cursor: pointer">{{recipe.name}}</td>
                 <td>{{recipe.description}}</td>
-                <td>
-                    <div>
-                        <ng-timepicker ng-model="ctrl.time3" init-time="{{recipe.timeToCookForTimepicker}}" theme="red"></ng-timepicker>
-                    </div>
-                </td>
+                <td>{{recipe.timeToCookForTimepicker}}</td>
                 <td>{{recipe.energyValue}}</td>
                 <td>
-                    <button type="button" class="btn btn-info">Редактировать</button>
-                    <button type="button" class="btn btn-info">Удалить</button></td>
+                    <button type="button" class="btn btn-info" ng-click="editRecipe(recipe.id)">Редактировать</button>
+                    <button type="button" class="btn btn-info" ng-click="deleteRecipe(this.recipe.id)" confirm-click="Вы действительно хотите удалить рецепт?">Удалить</button></td>
                 <td>
                     <input type="file" ng-model="newImage3" file-changed accept="image/*,image/jpeg"/>
                     <img file-preview="newImage3" width="100" height="100"/>
@@ -139,7 +231,13 @@
                 <td>{{ingredient.name}}</td>
                 <td><p><input type="number" size="3" name="num" min="0" max="1000" value="{{ingredient.amountOfProduct}}"></p></td>
                 <td>
-                    <select name="select" ng-options="unitsofmeasure.id as unitsofmeasure.name for unitsofmeasure in unitsofmeasures" ng-model="ingredient.unitOfMeasureId"></select>
+                    <p><select name="select">
+                        <option selected value="s1">г.</option>
+                        <option value="s2">л.</option>
+                        <option value="s3">ст.л.</option>
+                        <option value="s4">ч.л.</option>
+                    </select>
+                    </p>
                 </td>
                 <td>
                     <button type="button" class="btn btn-info">Редактировать</button>
@@ -165,11 +263,7 @@
             <tr ng-repeat="stepstocook in stepstocooks">
                 <td>{{stepstocook.name}}</td>
                 <td>{{stepstocook.description}}</td>
-                <td>
-                    <div id="datetimepicker33" class="input-append">
-                        <ng-timepicker ng-model="ctrl.time3" init-time="{{ stepstocook.timeForStepForTimepicker }}" theme="red"></ng-timepicker>
-                    </div>
-                </td>
+                <td>{{ stepstocook.timeForStepForTimepicker }}</td>
                 <td>
                     <button type="button" class="btn btn-info">Редактировать</button>
                     <button type="button" class="btn btn-info">Удалить</button>

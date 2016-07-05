@@ -1,0 +1,5 @@
+#!/bin/bash
+scriptFile="server.js"
+pkill -9 node
+node $scriptFile
+exit 0

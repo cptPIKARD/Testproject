@@ -18,6 +18,8 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/fatalityap/ios-cookingapp#readme",
   "dependencies": {
-    "express" : "^4.13.4"
+    "express" : "^4.13.4",
+    "confirm-click" : "^0.7.0",
+    "ng-alertify" : "^0.9.0"
   }
 }
